@@ -12,13 +12,13 @@ class TokenBucket{
     const BucketKey = `Rate:TokenBucket:${key}`
     
     try {
-      const data = await redis.hGetAll(BucketKey);
+      const data = await redis.hGetAll(BucketKey);      
       let token = data.token ? parseFloat(data.token) : this.capacity;
       const lastRefill = data.lastRefill ? parseFloat(data.lastRefill) : now;
       
       const timePassed = (now - lastRefill) / 1000;
       token = Math.min(this.capacity, token + (timePassed * this.refillRate));
-      
+
       if (token >= 1) {
         token -= 1;
         await redis.hSet(BucketKey, {

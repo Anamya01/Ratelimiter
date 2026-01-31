@@ -4,8 +4,8 @@ const TokenBucket = require("../strategies/TokenBucket")
 async function getConfig(ApiKey) {
   //get configuration from redis
   const redis = getRedisClient()
-  const config = redis.hGetAll(`apikey:${ApiKey}`)
-  
+  const config = await redis.hGetAll(`apikey:${ApiKey}`) // api
+
   if (!config || !config.limit) {
     return null
   }
@@ -35,7 +35,7 @@ const ratelimiter = () => {
       })
     }
     try {
-      const config = getConfig(ApiKey);
+      const config = await getConfig(ApiKey);
       if (!config) {
         return res.status(401).json({
           error: "Invalid Api Key",

@@ -2,6 +2,7 @@ const express = require('express')
 const crypto = require('crypto')
 const ratelimiter = require('../middleware/Ratelimiter');
 const { getRedisClient } = require('../config/redis.config');
+const { pool } = require('../config/postgres.config');
 const router = express.Router()
 
 
@@ -24,19 +25,21 @@ router.post('/key', async (req, res) => {
       createdAt: Date.now().toString()
     }
     
-    const redis = await getRedisClient();
+    // storing in postgres for persistence
+    await pool.query(`
+        INSERT INTO api_keys(api_key, name, rate_limit, window_ms, strategy) 
+        VALUES($1, $2, $3, $4, $5)`,
+        [api, config.name, config.limit, config.window, config.strategy]
+    )
+    
+    // storing in redis for fast access 
+    const redis = getRedisClient();
     await redis.hSet(`apikey:${api}`, config)
     
     res.json({
       api,
-      config: {
-        name: config.name,
-        limit: parseInt(config.limit),
-        window: parseInt(config.window),
-        strategy: config.strategy
-      }
-    })
-    
+      config
+    }) 
   }
   catch (error) {
     console.error("Error while generating api", error)

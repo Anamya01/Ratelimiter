@@ -3,15 +3,20 @@ const dotenv = require('dotenv')
 const cors = require('cors')
 const apiRouter = require('./routes/api')
 const { redisInit } = require('./config/redis.config')
+const { initPostgres } = require('./config/postgres.config')
 
 dotenv.config()
 const app = express()
 app.use(express.json())
 app.use(cors())
 
+
 const PORT = process.env.PORT || 3000
 
-redisInit().then(() => {
+Promise.all([
+  redisInit(),
+  initPostgres()
+  ]).then(() => {
   console.log("redis client connected")
 }).catch((err) => {
   console.log("Issue with connecting to redis", err)
