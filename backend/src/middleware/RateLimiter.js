@@ -1,4 +1,5 @@
 const { getRedisClient } = require("../config/redis.config")
+const FixedWindow = require("../strategies/FixedWindow")
 const TokenBucket = require("../strategies/TokenBucket")
 
 async function getConfig(ApiKey) {
@@ -20,8 +21,15 @@ async function getConfig(ApiKey) {
 }
 
 function createLimiter(strategy, config) {
-  const refillRate = config.limit / (config.window / 1000)
-  return new TokenBucket(config.limit, refillRate)
+  switch (strategy) {
+    case 'token-bucket':
+      const refillRate = config.limit / (config.window / 1000)
+      return new TokenBucket(config.limit, refillRate)
+    case 'fixed-window':
+      return new FixedWindow();
+    default:
+      throw new error("Unkown strategy");
+  }
 } //instanciating
 
 const ratelimiter = () => {
