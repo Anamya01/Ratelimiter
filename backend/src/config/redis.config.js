@@ -17,8 +17,7 @@ async function redisInit() {
   })
   
   await client.connect()
-  return client
-  
+  return client 
 }
 
 //getting redis client 

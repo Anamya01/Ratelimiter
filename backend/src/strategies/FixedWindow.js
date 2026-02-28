@@ -5,7 +5,7 @@ class FixedWindow{
     const redis = await getRedisClient();
     const now = Date.now();
     
-    const windowStart = Math.floor(now / Window) * windowms;
+    const windowStart = Math.floor(now / windowms) * windowms;
     const WindowKey = `Rate:FixedWindow:${key}:${windowStart}`
     try {
       const count = await redis.incr(WindowKey);
